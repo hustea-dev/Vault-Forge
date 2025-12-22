@@ -1,12 +1,7 @@
-// @ts-ignore
 import { test, describe, it, mock } from 'node:test';
-// @ts-ignore
 import assert from 'node:assert';
-// @ts-ignore
 import { GeneralStrategy } from './GeneralStrategy.ts';
-// @ts-ignore
 import { ObsidianService } from '../core/ObsidianService.ts';
-// @ts-ignore
 import { AppMode } from '../types/constants.ts';
 
 class MockObsidianService extends ObsidianService {
