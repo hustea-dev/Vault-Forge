@@ -6,12 +6,12 @@ Obsidian, Google Gemini, and X (formerly Twitter) integrated CLI tool to superch
 
 ## Features
 
--   **Seamless Integration**: Pipe any text from your terminal directly into your Obsidian vault, tagged and organized.
+-   **Seamless Integration**: Pipe any text from your terminal directly into your Obsidian vault, tagged and organized (for `debug` and `xpost` modes).
 -   **AI-Powered Analysis**: Leverage Google Gemini to summarize, debug, or repurpose your content based on the selected mode.
 -   **Multiple Modes**:
-    -   **General (`ai`)**: Summarize and analyze any text.
-    -   **Debug (`debug`)**: Analyze error logs and get solutions.
-    -   **X-Post (`xpost`)**: Generate tweet drafts from your notes and post them interactively.
+    -   **General (`ai`)**: Summarize and analyze any text directly in your terminal. **Does not save to Obsidian.**
+    -   **Debug (`debug`)**: Analyze error logs and save the session to Obsidian.
+    -   **X-Post (`xpost`)**: Generate tweet drafts from your notes and save the session to Obsidian.
 -   **Flexible Input**: Works with both file paths and standard input (pipes).
 -   **Customizable Prompts**: Easily modify AI instructions and switch languages.
 
@@ -120,9 +120,9 @@ The tool follows a simple command structure:
 
 | Command | `--mode`  | Description                                                                 |
 | :------ | :-------- | :-------------------------------------------------------------------------- |
-| `ai`    | `general` | **General Mode**: Summarizes or analyzes text. (Default)                    |
-| `xpost` | `xpost`   | **X-Post Mode**: Creates tweet drafts from text and posts interactively.    |
-| `debug` | `debug`   | **Debug Mode**: Analyzes error logs and suggests solutions.                 |
+| `ai`    | `general` | **General Mode**: Summarizes or analyzes text. (Default, does not save to Obsidian) |
+| `xpost` | `xpost`   | **X-Post Mode**: Creates tweet drafts from text and saves the session to Obsidian.    |
+| `debug` | `debug`   | **Debug Mode**: Analyzes error logs and saves the session to Obsidian.                 |
 
 | Argument / Option        | Short Form / Alias      | Description                               |
 | :----------------------- | :---------------------- | :---------------------------------------- |
@@ -136,7 +136,10 @@ The tool follows a simple command structure:
 #### **General Mode (`ai`)**
 
 ```sh
-# Summarize a file
+# Just chat with Gemini (No file, no pipe)
+ai "How are you today?"
+
+# Summarize a file (output to terminal only)
 ai my-notes.md
 
 # Summarize text from a pipe
@@ -152,7 +155,7 @@ cat my-notes.md | ai "What is the main conclusion of this article?"
 #### **X-Post Mode (`xpost`)**
 
 ```sh
-# Create tweet drafts from an article
+# Create tweet drafts from an article (saves to Obsidian)
 xpost ./posts/my-article.md
 
 # Create drafts from clipboard content
@@ -171,7 +174,7 @@ xpost my-article.md "Make it appealing to engineers, with a bit of humor"
 #### **Debug Mode (`debug`)**
 
 ```sh
-# Analyze an error log file
+# Analyze an error log file (saves to Obsidian)
 debug error.log
 
 # Analyze logs from a pipe
