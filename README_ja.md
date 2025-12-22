@@ -180,3 +180,7 @@ debug error.log
 # パイプからログを解析
 kubectl logs my-pod | debug
 ```
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。

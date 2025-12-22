@@ -182,3 +182,7 @@ debug error.log
 # Analyze logs from a pipe
 kubectl logs my-pod | debug
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
