@@ -9,6 +9,12 @@ import { GeneralStrategy } from "../strategies/GeneralStrategy.ts";
 import { XPostStrategy } from "../strategies/XPostStrategy.ts";
 import { TEXT } from '../config/text.ts';
 
+const MODE_CONFIG = {
+    [AppMode.X_POST]: { Strategy: XPostStrategy, saveInput: true },
+    [AppMode.DEBUG]: { Strategy: DebugStrategy, saveInput: true },
+    [AppMode.GENERAL]: { Strategy: GeneralStrategy, saveInput: false },
+} as const;
+
 export class ObsidAX {
     private genAI: GoogleGenAI;
     private config: ObsidAXConfig;
@@ -28,13 +34,18 @@ export class ObsidAX {
             throw new Error(TEXT.errors.noInput);
         }
 
+        const modeConfig = MODE_CONFIG[mode as AppMode] || MODE_CONFIG[AppMode.GENERAL];
+        
+        const strategy: ModeStrategy = new modeConfig.Strategy();
+        const shouldSaveInput = modeConfig.saveInput;
+
         const dateStr = now.toISOString().split('T')[0] || 'unknown-date';
         const timeStr = now.toTimeString().split(' ')[0]?.replace(/:/g, '') || '000000';
 
         const relativePath = path.join('Inbox', dateStr, `log_${timeStr}.md`);
         let fullPath = "";
 
-        if (mode !== AppMode.GENERAL) {
+        if (shouldSaveInput) {
             const frontmatter = createNoteContent({
                 date: now,
                 mode: mode,
@@ -44,27 +55,12 @@ export class ObsidAX {
             fullPath = await this.obsidian.createNote(relativePath, frontmatter);
             console.log(`\n${TEXT.logs.obsidianSaved}: ${fullPath}`);
         }
-
-        let strategy: ModeStrategy;
-
-        switch (mode) {
-            case AppMode.X_POST:
-                strategy = new XPostStrategy();
-                break;
-            case AppMode.DEBUG:
-                strategy = new DebugStrategy();
-                break;
-            case AppMode.GENERAL:
-            default:
-                strategy = new GeneralStrategy();
-                break;
-        }
         
         const result = await strategy.execute(
             inputData,
             this.obsidian,
             this.genAI,
-            { relativePath, fullPath }, // fullPathは空文字の可能性があるが、GeneralStrategyでは使われないのでOK
+            { relativePath, fullPath },
             this.config.instruction
         );
         
