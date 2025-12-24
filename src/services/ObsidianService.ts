@@ -19,7 +19,6 @@ export class ObsidianService {
         const fullPath = path.join(this.vaultPath, relativePath);
         const dirPath = path.dirname(fullPath);
 
-        // ディレクトリが存在しない場合は作成
         await fs.mkdir(dirPath, { recursive: true });
 
         await fs.writeFile(fullPath, content, 'utf-8');
