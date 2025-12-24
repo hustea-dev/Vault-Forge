@@ -40,7 +40,7 @@ export class PromptLoader {
                     await this.obsidian.createNote(relativePath, defaultContent);
                     
                     const logMessage = TEXT.loader.createdDefaultFile.replace('{filePath}', relativePath);
-                    console.log(`ℹ️  ${logMessage}`);
+                    console.log(logMessage);
 
                     const { content } = matter(defaultContent);
                     return content.trim();

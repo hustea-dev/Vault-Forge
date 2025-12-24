@@ -49,7 +49,7 @@ export const MESSAGES = {
         usingDefault: "デフォルトプロンプトを使用します。",
         aborting: "処理を中止しました。",
         loadErrorDetail: "プロンプトファイルの読み込みに失敗しました: {filePath}",
-        createdDefaultFile: "デフォルトのプロンプトファイルを作成しました: {filePath}",
+        createdDefaultFile: "ℹ️  情報: デフォルトのプロンプトファイルを作成しました: {filePath}",
         createDefaultError: "デフォルトのプロンプトファイルの作成に失敗しました: {filePath}",
         defaultPromptDescription: "{promptName} 用に自動生成されたプロンプト",
         noDefaultPrompt: "デフォルトのプロンプトが見つかりません: {promptName}"

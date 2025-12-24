@@ -49,7 +49,7 @@ export const MESSAGES = {
         usingDefault: "Using default prompt.",
         aborting: "Process aborted.",
         loadErrorDetail: "Failed to load prompt file: {filePath}",
-        createdDefaultFile: "Created default prompt file: {filePath}",
+        createdDefaultFile: "ℹ️  Info: Created default prompt file: {filePath}",
         createDefaultError: "Failed to create default prompt file: {filePath}",
         defaultPromptDescription: "Auto-generated prompt for {promptName}",
         noDefaultPrompt: "No default prompt found for: {promptName}"
