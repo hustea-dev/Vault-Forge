@@ -51,7 +51,8 @@ export const MESSAGES = {
         loadErrorDetail: "Failed to load prompt file: {filePath}",
         createdDefaultFile: "Created default prompt file: {filePath}",
         createDefaultError: "Failed to create default prompt file: {filePath}",
-        defaultPromptDescription: "Auto-generated prompt for {promptName}"
+        defaultPromptDescription: "Auto-generated prompt for {promptName}",
+        noDefaultPrompt: "No default prompt found for: {promptName}"
     },
     labels: {
         additionalInstruction: "Additional Instructions",

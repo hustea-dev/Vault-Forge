@@ -51,7 +51,8 @@ export const MESSAGES = {
         loadErrorDetail: "プロンプトファイルの読み込みに失敗しました: {filePath}",
         createdDefaultFile: "デフォルトのプロンプトファイルを作成しました: {filePath}",
         createDefaultError: "デフォルトのプロンプトファイルの作成に失敗しました: {filePath}",
-        defaultPromptDescription: "{promptName} 用に自動生成されたプロンプト"
+        defaultPromptDescription: "{promptName} 用に自動生成されたプロンプト",
+        noDefaultPrompt: "デフォルトのプロンプトが見つかりません: {promptName}"
     },
     labels: {
         additionalInstruction: "追加の指示",

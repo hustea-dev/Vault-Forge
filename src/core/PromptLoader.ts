@@ -45,7 +45,8 @@ export class PromptLoader {
                     const { content } = matter(defaultContent);
                     return content.trim();
                 }
-                throw new Error(`No default prompt found for: ${promptName}`);
+                const errorMessage = TEXT.loader.noDefaultPrompt.replace('{promptName}', promptName);
+                throw new Error(errorMessage);
             }
             
             if (error instanceof z.ZodError) {
