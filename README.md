@@ -121,7 +121,7 @@ You can fully customize the system prompts directly from your Obsidian Vault.
 3.  **Editing**: Simply edit these Markdown files in Obsidian. The changes are applied immediately to your next CLI execution.
 
 <p align="center">
-  <img src="assets/customprompt.png" alt="custom prompt" width="600">
+  <img src="assets/customprompt-en.png" alt="custom prompt" width="600">
 </p>
 
 ## License
