@@ -1,8 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { UserInteraction } from '../services/UserInteraction.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
-import type { ModeStrategy } from '../types/interfaces.ts';
+import type { ModeStrategy, AIService } from '../types/interfaces.ts';
 import { AppMode } from '../types/constants.ts';
 import { TEXT } from '../config/text.ts';
 
@@ -17,7 +16,7 @@ export abstract class BaseStrategy implements ModeStrategy {
     async execute(
         inputData: string,
         obsidian: ObsidianService,
-        genAI: GoogleGenAI,
+        aiService: AIService,
         promptLoader: PromptLoader,
         fileInfo: { relativePath: string; fullPath: string },
         instruction?: string
@@ -25,7 +24,7 @@ export abstract class BaseStrategy implements ModeStrategy {
         
         const context = await this.prepareContext(inputData, obsidian, fileInfo);
         const prompt = await this.getPrompt(promptLoader);
-        const responseText = await this.analyze(context, genAI, prompt, instruction);
+        const responseText = await this.analyze(context, aiService, prompt, instruction);
 
         await this.processResult(responseText, obsidian, fileInfo);
         return { responseText };
@@ -51,10 +50,10 @@ export abstract class BaseStrategy implements ModeStrategy {
         }
     }
 
-    protected async analyze(context: string, genAI: GoogleGenAI, promptTemplate: string, instruction?: string): Promise<string> {
+    protected async analyze(context: string, aiService: AIService, prompt: string, instruction?: string): Promise<string> {
         console.log(`${TEXT.logs.geminiAnalyzing} (${this.mode} ${TEXT.logs.modeSuffix})...`);
 
-        let promptText = `${promptTemplate}\n\n`;
+        let promptText = `${prompt}\n\n`;
         
         if (instruction) {
             promptText += `${TEXT.labels.additionalInstruction}:\n${instruction}\n\n`;
@@ -63,19 +62,19 @@ export abstract class BaseStrategy implements ModeStrategy {
         promptText += `${TEXT.labels.targetData}:\n${context}`;
 
         try {
-            const result = await genAI.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: [
-                    {
-                        role: "user",
-                        parts: [{ text: promptText }]
-                    }
-                ]
-            });
-
+            const result = await aiService.generateContent(promptText);
             const responseText = result.text || TEXT.errors.analysisFailed;
+
             console.log(`\n${TEXT.logs.analysisResult}:\n${responseText}`);
             
+            if (result.usage) {
+                const logMessage = TEXT.logs.tokenUsage
+                    .replace('{input}', result.usage.promptTokens.toString())
+                    .replace('{output}', result.usage.completionTokens.toString())
+                    .replace('{total}', result.usage.totalTokens.toString());
+                console.log(`\n${logMessage}`);
+            }
+
             return responseText;
 
         } catch (error) {

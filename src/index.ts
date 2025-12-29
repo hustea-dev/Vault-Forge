@@ -1,54 +1,17 @@
 import * as dotenv from 'dotenv';
 import * as fs from 'fs/promises';
-import { ObsidAX } from './core/ObsidAX.ts';
+import { VaultForge } from './core/VaultForge.ts';
 import { AppMode } from './types/constants.ts';
 import { TEXT } from './config/text.ts';
+import type { VaultForgeConfig } from './types/interfaces.ts';
+import { AIServiceFactory } from './services/ai/AIServiceFactory.ts';
 
 dotenv.config();
 
-async function readStdin(): Promise<string> {
-    if (process.stdin.isTTY) {
-        return "";
-    }
-    
-    const chunks: Buffer[] = [];
-    try {
-        for await (const chunk of process.stdin) {
-            chunks.push(Buffer.from(chunk));
-        }
-        return Buffer.concat(chunks).toString('utf-8');
-    } catch (error) {
-        return "";
-    }
-}
-
-function validateMode(modeInput: string | undefined): AppMode {
-    if (!modeInput) return AppMode.GENERAL;
-
-    const validModes = Object.values(AppMode) as string[];
-    if (validModes.includes(modeInput)) {
-        return modeInput as AppMode;
-    }
-
-    console.error(`${TEXT.errors.invalidMode} '${modeInput}'`);
-    console.error(`${TEXT.errors.availableModes}: ${validModes.join(', ')}`);
-    process.exit(1);
-}
-
-(async () => {
-    const API_KEY = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-    const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH;
-
-    if (!API_KEY || !VAULT_PATH) {
-        console.error(TEXT.errors.envMissing);
-        process.exit(1);
-    }
-
-    const args = process.argv.slice(2);
-    
-    const modeArg = args.find(arg => arg.startsWith('--mode='));
-    const modeInput = modeArg ? modeArg.split('=')[1] : undefined;
-    
+/**
+ * ユーザーの入力を解決する
+ */
+async function resolveInput(args: string[]) {
     const fileArg = args.find(arg => arg.startsWith('--file='));
     let filePath = fileArg ? fileArg.split('=')[1] : undefined;
     
@@ -93,19 +56,61 @@ function validateMode(modeInput: string | undefined): AppMode {
         inputData = await readStdin().catch(() => "");
     }
 
-    const mode = validateMode(modeInput);
+    return { inputData, filePath, instruction };
+}
 
-    const app = new ObsidAX({
-        apiKey: API_KEY,
-        vaultPath: VAULT_PATH,
-        inputData,
-        mode,
-        instruction,
-        filePath
-    });
+async function readStdin(): Promise<string> {
+    if (process.stdin.isTTY) return "";
+    const chunks: Buffer[] = [];
+    for await (const chunk of process.stdin) {
+        chunks.push(Buffer.from(chunk));
+    }
+    return Buffer.concat(chunks).toString('utf-8');
+}
 
-    await app.run().catch((e) => {
-        console.error(TEXT.errors.executionError, e);
+function validateMode(modeInput: string | undefined): AppMode {
+    if (!modeInput) return AppMode.GENERAL;
+    const validModes = Object.values(AppMode) as string[];
+    if (validModes.includes(modeInput)) {
+        return modeInput as AppMode;
+    }
+    console.error(`${TEXT.errors.invalidMode} '${modeInput}'`);
+    console.error(`${TEXT.errors.availableModes}: ${validModes.join(', ')}`);
+    process.exit(1);
+}
+
+(async () => {
+    try {
+        const vaultPath = process.env.OBSIDIAN_VAULT_PATH;
+        if (!vaultPath) {
+            throw new Error(TEXT.errors.envMissing);
+        }
+
+        const { aiProvider, apiKey } = AIServiceFactory.resolveConfig();
+        const args = process.argv.slice(2);
+        const { inputData, filePath, instruction } = await resolveInput(args);
+        const modeArg = args.find(arg => arg.startsWith('--mode='));
+        const mode = validateMode(modeArg ? modeArg.split('=')[1] : undefined);
+
+        if (!inputData.trim()) {
+            throw new Error(TEXT.errors.noInput);
+        }
+
+        const config: VaultForgeConfig = {
+            apiKey,
+            vaultPath,
+            inputData,
+            mode,
+            instruction,
+            filePath,
+            aiProvider
+        };
+
+        const app = new VaultForge(config);
+        await app.run();
+
+    } catch (e: any) {
+        console.error(TEXT.errors.executionError, e.message);
         process.exit(1);
-    });
+    }
 })();

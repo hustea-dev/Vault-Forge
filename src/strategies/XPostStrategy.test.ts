@@ -5,7 +5,7 @@ import { ObsidianService } from '../services/ObsidianService.ts';
 import { XService } from '../services/XService.ts';
 import { UserInteraction } from '../services/UserInteraction.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
-import type { XPostCandidate } from '../types/interfaces.ts';
+import type { XPostCandidate, AIService, AIResponse } from '../types/interfaces.ts';
 
 // モック用のクラス定義
 class MockObsidianService extends ObsidianService {
@@ -27,13 +27,17 @@ class MockObsidianService extends ObsidianService {
     async appendNote() {}
 }
 
-class MockGenAI {
+class MockAIService implements AIService {
     lastPrompt = "";
-    async generateContent(params: any) {
-        this.lastPrompt = params.contents[0].parts[0].text;
-        return { text: "Mock AI Response" };
+    mockResponseText = "";
+
+    async generateContent(prompt: string): Promise<AIResponse> {
+        this.lastPrompt = prompt;
+        return { 
+            text: this.mockResponseText || "Mock AI Response",
+            usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 }
+        };
     }
-    models = { generateContent: this.generateContent.bind(this) }
 }
 
 class MockXService extends XService {
@@ -103,7 +107,7 @@ describe('XPostStrategy', () => {
         const mockUI = new MockUserInteraction();
         const strategy = new TestableXPostStrategy(mockUI);
         const mockObsidian = new MockObsidianService();
-        const mockGenAI = new MockGenAI() as any;
+        const mockAIService = new MockAIService();
         
         const mockLoader = {
             load: async (name: string, defaultPrompt: string) => defaultPrompt
@@ -114,17 +118,14 @@ describe('XPostStrategy', () => {
             { content: "Post 2", hashtags: ["#tag2"] }
         ];
         
-        mockGenAI.models.generateContent = async (params: any) => {
-            mockGenAI.lastPrompt = params.contents[0].parts[0].text;
-            return { text: JSON.stringify(mockCandidates) };
-        };
+        mockAIService.mockResponseText = JSON.stringify(mockCandidates);
 
         const fileInfo = { relativePath: "blog_post.md", fullPath: "/tmp/blog_post.md" };
 
         await strategy.execute(
             "Initial Input",
             mockObsidian, 
-            mockGenAI, 
+            mockAIService,
             mockLoader,
             fileInfo
         );

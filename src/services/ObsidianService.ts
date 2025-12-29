@@ -69,8 +69,13 @@ export class ObsidianService {
      * @param mode 実行モード
      */
     async appendAnalysisResult(relativePath: string, responseText: string, mode: AppMode): Promise<void> {
-        const analysisSection = `\n${TEXT.markdown.analysisHeader} (${mode})\n${responseText}\n`;
+        const header = mode === AppMode.X_POST
+            ? TEXT.markdown.xPostHeader 
+            : TEXT.markdown.analysisHeader;
+
+        const analysisSection = `\n${header} (${mode})\n${responseText}\n`;
         await this.appendNote(relativePath, analysisSection);
-        console.log(`\n${TEXT.logs.obsidianAppended}`);
+        
+        console.log(`\n${TEXT.logs.fileRecorded}: ${relativePath}`);
     }
 }

@@ -1,9 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
 import { AppMode } from './constants.ts';
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
 
-export interface ObsidAXConfig {
+export interface VaultForgeConfig {
     apiKey: string;
     vaultPath: string;
     inputData: string;
@@ -11,13 +10,29 @@ export interface ObsidAXConfig {
     date?: Date;
     instruction?: string;
     filePath?: string;
+    aiProvider?: string;
+}
+
+export interface TokenUsage {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+}
+
+export interface AIResponse {
+    text: string;
+    usage?: TokenUsage;
+}
+
+export interface AIService {
+    generateContent(prompt: string): Promise<AIResponse>;
 }
 
 export interface ModeStrategy {
     execute(
         inputData: string,
         obsidian: ObsidianService,
-        genAI: GoogleGenAI,
+        aiService: AIService,
         promptLoader: PromptLoader,
         fileInfo: { relativePath: string; fullPath: string },
         instruction?: string

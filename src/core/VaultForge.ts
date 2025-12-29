@@ -1,7 +1,6 @@
 import * as path from 'path';
-import { GoogleGenAI } from "@google/genai";
 import { AppMode } from '../types/constants.ts';
-import type { ModeStrategy, ObsidAXConfig } from '../types/interfaces.ts';
+import type { ModeStrategy, VaultForgeConfig, AIService } from '../types/interfaces.ts';
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { PromptLoader } from './PromptLoader.ts';
 import { createNoteContent } from "../templates/obsidianNote.ts";
@@ -9,6 +8,7 @@ import { DebugStrategy } from "../strategies/DebugStrategy.ts";
 import { GeneralStrategy } from "../strategies/GeneralStrategy.ts";
 import { XPostStrategy } from "../strategies/XPostStrategy.ts";
 import { TEXT } from '../config/text.ts';
+import { AIServiceFactory } from '../services/ai/AIServiceFactory.ts';
 
 const MODE_CONFIG = {
     [AppMode.X_POST]: { Strategy: XPostStrategy, saveInput: true },
@@ -16,15 +16,15 @@ const MODE_CONFIG = {
     [AppMode.GENERAL]: { Strategy: GeneralStrategy, saveInput: false },
 } as const;
 
-export class ObsidAX {
-    private genAI: GoogleGenAI;
-    private config: ObsidAXConfig;
+export class VaultForge {
+    private aiService: AIService;
+    private config: VaultForgeConfig;
     private obsidian: ObsidianService;
     private promptLoader: PromptLoader;
 
-    constructor(config: ObsidAXConfig) {
+    constructor(config: VaultForgeConfig) {
         this.config = config;
-        this.genAI = new GoogleGenAI({ apiKey: config.apiKey });
+        this.aiService = AIServiceFactory.create(config.aiProvider, config.apiKey);
         this.obsidian = new ObsidianService(config.vaultPath);
         
         const lang = process.env.APP_LANG || 'ja';
@@ -64,7 +64,7 @@ export class ObsidAX {
         const result = await strategy.execute(
             inputData,
             this.obsidian,
-            this.genAI,
+            this.aiService,
             this.promptLoader,
             { relativePath, fullPath },
             this.config.instruction

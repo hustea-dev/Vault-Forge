@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ObsidAX } from './src/core/ObsidAX.ts';
+import { ObsidAX } from './src/PLAN/ObsidAX.ts';
 import { AppMode } from './src/types/constants.ts';
 import * as fs from 'fs/promises';
 import * as path from 'path';

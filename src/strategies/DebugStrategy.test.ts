@@ -4,6 +4,7 @@ import { DebugStrategy } from './DebugStrategy.ts';
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
 import { AppMode } from '../types/constants.ts';
+import type { AIService, AIResponse } from '../types/interfaces.ts';
 
 // モックの定義
 class MockObsidianService extends ObsidianService {
@@ -23,14 +24,12 @@ class MockObsidianService extends ObsidianService {
     }
 }
 
-class MockGenAI {
-    async generateContent() {
+class MockAIService implements AIService {
+    async generateContent(prompt: string): Promise<AIResponse> {
         return {
-            text: "Debug Analysis Result"
+            text: "Debug Analysis Result",
+            usage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 }
         };
-    }
-    models = {
-        generateContent: this.generateContent
     }
 }
 
@@ -55,7 +54,7 @@ describe('DebugStrategy', () => {
     it('should execute analysis AND append to Obsidian', async () => {
         const strategy = new DebugStrategy();
         const mockObsidian = new MockObsidianService();
-        const mockGenAI = new MockGenAI() as any;
+        const mockAIService = new MockAIService();
         
         const mockLoader = {
             load: async (name: string, defaultPrompt: string) => defaultPrompt
@@ -67,7 +66,7 @@ describe('DebugStrategy', () => {
         const result = await strategy.execute(
             inputData,
             mockObsidian,
-            mockGenAI,
+            mockAIService,
             mockLoader,
             fileInfo
         );

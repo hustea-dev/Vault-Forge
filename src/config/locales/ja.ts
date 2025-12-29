@@ -15,7 +15,11 @@ export const MESSAGES = {
         xPostStart: "🚀 X投稿モードを開始します...",
         xPostSelected: "📝 選択された投稿内容:",
         xPostSuccess: "✅ Xに投稿しました！",
-        xPostCancel: "❌ 投稿をキャンセルしました。"
+        xPostCancel: "❌ 投稿をキャンセルしました。",
+        fileRecorded: "☑️  解析結果をファイルに記録しました",
+        tokenUsage: "📊 トークン使用量: 入力={input}, 出力={output}, 合計={total}",
+        xPostRetry: "🔄 再生成します...",
+        xPostSaveExit: "💾 保存して終了します。"
     },
     errors: {
         noInput: "パイプ経由で入力データが渡されていません。",
@@ -35,12 +39,17 @@ export const MESSAGES = {
     markdown: {
         originalDataHeader: "## 📥 原文データ",
         analysisHeader: "## 🧠 Gemini 解析結果",
+        xPostHeader: "## 🐦 X投稿案",
         xPostSuccessHeader: "## 🚀 X投稿完了",
         xPostFailHeader: "## ❌ X投稿失敗"
     },
     ui: {
         selectPost: "投稿する案を選択してください:",
-        confirmPost: "この内容でXに投稿しますか？"
+        confirmPost: "この内容でXに投稿しますか？",
+        retryOption: "🔄 再生成 (Retry)",
+        retryDesc: "AIに投稿案を再生成させます",
+        saveExitOption: "💾 保存して終了 (Save & Exit)",
+        saveExitDesc: "投稿せずに終了します（ログは保存されています）"
     },
     loader: {
         loadError: "カスタムプロンプトの読み込みに失敗しました。",

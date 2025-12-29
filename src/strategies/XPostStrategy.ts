@@ -3,11 +3,11 @@ import { TEXT } from '../config/text.ts';
 import { AppMode } from '../types/constants.ts';
 import { BaseStrategy } from './BaseStrategy.ts';
 import { XService } from '../services/XService.ts';
-import type { XPostCandidate } from '../types/interfaces.ts';
+import type { XPostCandidate, AIService } from '../types/interfaces.ts';
+import { PromptLoader } from '../core/PromptLoader.ts';
 
 export class XPostStrategy extends BaseStrategy {
     protected mode = AppMode.X_POST;
-    protected promptTemplate = TEXT.prompts.xpost;
 
     protected override async prepareContext(
         inputData: string, 
@@ -17,44 +17,99 @@ export class XPostStrategy extends BaseStrategy {
         return await obsidian.readContextNote(fileInfo.relativePath);
     }
 
-    protected override async processResult(
-        responseText: string, 
-        obsidian: ObsidianService, 
-        fileInfo: { relativePath: string; fullPath: string }
-    ): Promise<void> {
-        await obsidian.appendAnalysisResult(fileInfo.relativePath, responseText, this.mode);
+    override async execute(
+        inputData: string,
+        obsidian: ObsidianService,
+        aiService: AIService,
+        promptLoader: PromptLoader,
+        fileInfo: { relativePath: string; fullPath: string },
+        instruction?: string
+    ): Promise<any> {
+        const context = await this.prepareContext(inputData, obsidian, fileInfo);
+        let prompt = await this.getPrompt(promptLoader);
+        
+        while (true) {
+            const responseText = await this.analyze(context, aiService, prompt, instruction);
+            
+            await obsidian.appendAnalysisResult(fileInfo.relativePath, responseText, this.mode);
 
+            if (!this.ui.isInteractive()) {
+                 console.warn(TEXT.errors.notTTY);
+                 return { responseText };
+            }
+
+            const candidates = this.parseCandidates(responseText);
+            if (!candidates) {
+                return { responseText };
+            }
+
+            console.log(`\n${TEXT.logs.xPostStart}`);
+
+            type ChoiceValue = 
+                | { type: 'post'; data: XPostCandidate }
+                | { type: 'retry'; data: null }
+                | { type: 'save_exit'; data: null };
+
+            const choices: { name: string; value: ChoiceValue; description?: string }[] = candidates.map((c, index) => ({
+                name: `${index + 1}. ${c.content.substring(0, 50)}... (${c.hashtags.join(' ')})`,
+                value: { type: 'post', data: c },
+                description: c.content
+            }));
+
+            choices.push({
+                name: TEXT.ui.retryOption,
+                value: { type: 'retry', data: null },
+                description: TEXT.ui.retryDesc
+            });
+
+            choices.push({
+                name: TEXT.ui.saveExitOption,
+                value: { type: 'save_exit', data: null },
+                description: TEXT.ui.saveExitDesc
+            });
+
+            const selected = await this.ui.askSelect(TEXT.ui.selectPost, choices);
+
+            if (selected.type === 'retry') {
+                console.log(TEXT.logs.xPostRetry);
+                continue;
+            }
+
+            if (selected.type === 'save_exit') {
+                console.log(TEXT.logs.xPostSaveExit);
+                return { responseText };
+            }
+
+            if (selected.type === 'post' && selected.data) {
+                await this.handlePost(selected.data, obsidian, fileInfo);
+                return { responseText };
+            }
+        }
+    }
+
+    private parseCandidates(responseText: string): XPostCandidate[] | null {
         let candidates: XPostCandidate[] = [];
         try {
             const cleanJson = responseText.replace(/```json\n?|\n?```/g, '').trim();
             candidates = JSON.parse(cleanJson);
         } catch (e) {
             console.error(TEXT.errors.jsonParseFailed);
-            return;
+            return null;
         }
 
         if (!Array.isArray(candidates) || candidates.length === 0) {
             console.error(TEXT.errors.noCandidates);
-            return;
+            return null;
         }
+        return candidates;
+    }
 
-        if (!this.ui.isInteractive()) {
-             console.warn(TEXT.errors.notTTY);
-             return;
-        }
-
-        console.log(`\n${TEXT.logs.xPostStart}`);
-
-        const selectedPost = await this.ui.askSelect(
-            TEXT.ui.selectPost,
-            candidates.map((c, index) => ({
-                name: `${index + 1}. ${c.content.substring(0, 50)}... (${c.hashtags.join(' ')})`,
-                value: c,
-                description: c.content
-            }))
-        );
-
-        const fullPostContent = `${selectedPost.content}\n\n${selectedPost.hashtags.join(" ")}`;
+    private async handlePost(
+        candidate: XPostCandidate, 
+        obsidian: ObsidianService, 
+        fileInfo: { relativePath: string; fullPath: string }
+    ) {
+        const fullPostContent = `${candidate.content}\n\n${candidate.hashtags.join(" ")}`;
 
         console.log(`\n${TEXT.logs.xPostSelected}`);
         console.log("--------------------------------------------------");

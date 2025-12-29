@@ -15,7 +15,11 @@ export const MESSAGES = {
         xPostStart: "🚀 Starting X post mode...",
         xPostSelected: "📝 Selected post content:",
         xPostSuccess: "✅ Posted to X!",
-        xPostCancel: "❌ Post cancelled."
+        xPostCancel: "❌ Post cancelled.",
+        fileRecorded: "☑️  Analysis result recorded in file",
+        tokenUsage: "📊 Token Usage: Input={input}, Output={output}, Total={total}",
+        xPostRetry: "🔄 Regenerating...",
+        xPostSaveExit: "💾 Saving and exiting."
     },
     errors: {
         noInput: "No input data provided via pipe.",
@@ -35,12 +39,17 @@ export const MESSAGES = {
     markdown: {
         originalDataHeader: "## 📥 Original Data",
         analysisHeader: "## 🧠 Gemini Analysis Result",
+        xPostHeader: "## 🐦 X Post Drafts",
         xPostSuccessHeader: "## 🚀 X Post Completed",
         xPostFailHeader: "## ❌ X Post Failed"
     },
     ui: {
         selectPost: "Select a post candidate:",
-        confirmPost: "Post this content to X?"
+        confirmPost: "Post this content to X?",
+        retryOption: "🔄 Retry",
+        retryDesc: "Regenerate post drafts with AI",
+        saveExitOption: "💾 Save & Exit",
+        saveExitDesc: "Exit without posting (log is already saved)"
     },
     loader: {
         loadError: "Failed to load custom prompt.",
