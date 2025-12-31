@@ -5,16 +5,17 @@ import { ObsidianService } from '../services/ObsidianService.ts';
 import { XService } from '../services/XService.ts';
 import { UserInteraction } from '../services/UserInteraction.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
+import { AppMode } from '../types/constants.ts';
 import type { XPostCandidate, AIService, AIResponse } from '../types/interfaces.ts';
 
-// モック用のクラス定義
 class MockObsidianService extends ObsidianService {
     constructor() { super('/tmp'); }
     appendCalled = false;
     readCalled = false;
     lastReadPath = "";
     
-    async appendAnalysisResult() { 
+    // シグネチャ変更: mode -> header
+    async appendAnalysisResult(relativePath: string, content: string, header: string) { 
         this.appendCalled = true;
     }
     
@@ -25,6 +26,10 @@ class MockObsidianService extends ObsidianService {
     }
     
     async appendNote() {}
+
+    async createInitialLog(date: Date, mode: AppMode, inputData: string, relativePath: string): Promise<string> {
+        return `/tmp/${relativePath}`;
+    }
 }
 
 class MockAIService implements AIService {
@@ -110,7 +115,7 @@ describe('XPostStrategy', () => {
         const mockAIService = new MockAIService();
         
         const mockLoader = {
-            load: async (name: string, defaultPrompt: string) => defaultPrompt
+            load: async (name: string) => "default prompt"
         } as unknown as PromptLoader;
 
         const mockCandidates = [
@@ -125,9 +130,10 @@ describe('XPostStrategy', () => {
         await strategy.execute(
             "Initial Input",
             mockObsidian, 
-            mockAIService,
+            mockAIService, 
             mockLoader,
-            fileInfo
+            fileInfo,
+            new Date()
         );
 
         assert.strictEqual(mockObsidian.readCalled, true, "Should read from Obsidian");

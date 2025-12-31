@@ -1,6 +1,7 @@
 import { AppMode } from './constants.ts';
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
+// import {AIService} from './interfaces.ts';
 
 export interface VaultForgeConfig {
     apiKey: string;
@@ -35,6 +36,7 @@ export interface ModeStrategy {
         aiService: AIService,
         promptLoader: PromptLoader,
         fileInfo: { relativePath: string; fullPath: string },
+        date: Date,
         instruction?: string
     ): Promise<any>;
 }

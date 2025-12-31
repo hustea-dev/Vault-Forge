@@ -7,6 +7,7 @@ import { TEXT } from '../config/text.ts';
 
 export abstract class BaseStrategy implements ModeStrategy {
     protected abstract mode: AppMode;
+    protected abstract saveInput: boolean;
     protected ui: UserInteraction;
 
     constructor() {
@@ -19,9 +20,19 @@ export abstract class BaseStrategy implements ModeStrategy {
         aiService: AIService,
         promptLoader: PromptLoader,
         fileInfo: { relativePath: string; fullPath: string },
+        date: Date,
         instruction?: string
     ): Promise<any> {
         
+        if (this.saveInput) {
+            fileInfo.fullPath = await obsidian.createInitialLog(
+                date,
+                this.mode,
+                inputData,
+                fileInfo.relativePath
+            );
+        }
+
         const context = await this.prepareContext(inputData, obsidian, fileInfo);
         const prompt = await this.getPrompt(promptLoader);
         const responseText = await this.analyze(context, aiService, prompt, instruction);

@@ -13,14 +13,19 @@ class MockObsidianService extends ObsidianService {
     appendCalled = false;
     lastAppendPath = "";
     lastAppendContent = "";
-    lastAppendMode: AppMode | null = null;
+    lastAppendHeader = "";
     
-    async appendAnalysisResult(relativePath: string, content: string, mode: AppMode) { 
+    // シグネチャ変更: mode -> header
+    async appendAnalysisResult(relativePath: string, content: string, header: string) { 
         this.appendCalled = true;
         this.lastAppendPath = relativePath;
         this.lastAppendContent = content;
-        this.lastAppendMode = mode;
+        this.lastAppendHeader = header;
         return; 
+    }
+    
+    async createInitialLog(date: Date, mode: AppMode, inputData: string, relativePath: string): Promise<string> {
+        return `/tmp/${relativePath}`;
     }
 }
 
@@ -34,7 +39,6 @@ class MockAIService implements AIService {
 }
 
 describe('DebugStrategy', () => {
-    // コンソールログの抑制
     const originalLog = console.log;
     const originalError = console.error;
     const originalWarn = console.warn;
@@ -57,7 +61,7 @@ describe('DebugStrategy', () => {
         const mockAIService = new MockAIService();
         
         const mockLoader = {
-            load: async (name: string, defaultPrompt: string) => defaultPrompt
+            load: async (name: string) => "default prompt"
         } as unknown as PromptLoader;
 
         const inputData = "Error log content";
@@ -68,13 +72,16 @@ describe('DebugStrategy', () => {
             mockObsidian,
             mockAIService,
             mockLoader,
-            fileInfo
+            fileInfo,
+            new Date()
         );
 
         assert.strictEqual(result.responseText, "Debug Analysis Result");
         assert.strictEqual(mockObsidian.appendCalled, true, "Should call appendAnalysisResult");
         assert.strictEqual(mockObsidian.lastAppendPath, fileInfo.relativePath);
-        assert.strictEqual(mockObsidian.lastAppendMode, AppMode.DEBUG);
+        // ヘッダーが含まれているかチェック
+        assert.ok(mockObsidian.lastAppendHeader.includes("Gemini 解析結果"), "Header should contain analysis title");
+        assert.ok(mockObsidian.lastAppendHeader.includes(AppMode.DEBUG), "Header should contain mode name");
         assert.strictEqual(mockObsidian.lastAppendContent, "Debug Analysis Result");
     });
 });

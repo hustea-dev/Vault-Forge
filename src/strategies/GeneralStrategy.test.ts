@@ -3,17 +3,20 @@ import assert from 'node:assert';
 import { GeneralStrategy } from './GeneralStrategy.ts';
 import { ObsidianService } from '../services/ObsidianService.ts';
 import { PromptLoader } from '../core/PromptLoader.ts';
+import { AppMode } from '../types/constants.ts';
 import type { AIService, AIResponse } from '../types/interfaces.ts';
 
 class MockObsidianService extends ObsidianService {
     constructor() { super('/tmp'); }
     appendCalled = false;
     
-    async appendAnalysisResult() { 
+    // シグネチャ変更: mode -> header
+    async appendAnalysisResult(relativePath: string, content: string, header: string) { 
         this.appendCalled = true;
         return; 
     }
     async readContextNote() { return "mock content"; }
+    async createInitialLog() { return "/tmp/mock.md"; }
 }
 
 class MockAIService implements AIService {
@@ -32,7 +35,7 @@ describe('GeneralStrategy', () => {
         const mockAIService = new MockAIService();
         
         const mockLoader = {
-            load: async (name: string, defaultPrompt: string) => defaultPrompt
+            load: async (name: string) => "default prompt"
         } as unknown as PromptLoader;
 
         const originalLog = console.log;
@@ -44,7 +47,8 @@ describe('GeneralStrategy', () => {
                 mockObsidian,
                 mockAIService,
                 mockLoader,
-                { relativePath: "test.md", fullPath: "/tmp/test.md" }
+                { relativePath: "test.md", fullPath: "/tmp/test.md" },
+                new Date()
             );
 
             assert.strictEqual(result.responseText, "Mock AI Response");

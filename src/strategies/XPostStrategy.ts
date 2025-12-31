@@ -8,6 +8,7 @@ import { PromptLoader } from '../core/PromptLoader.ts';
 
 export class XPostStrategy extends BaseStrategy {
     protected mode = AppMode.X_POST;
+    protected saveInput = true;
 
     protected override async prepareContext(
         inputData: string, 
@@ -23,15 +24,27 @@ export class XPostStrategy extends BaseStrategy {
         aiService: AIService,
         promptLoader: PromptLoader,
         fileInfo: { relativePath: string; fullPath: string },
+        date: Date,
         instruction?: string
     ): Promise<any> {
+        
+        if (this.saveInput) {
+            fileInfo.fullPath = await obsidian.createInitialLog(
+                date,
+                this.mode,
+                inputData,
+                fileInfo.relativePath
+            );
+        }
+
         const context = await this.prepareContext(inputData, obsidian, fileInfo);
         let prompt = await this.getPrompt(promptLoader);
         
         while (true) {
             const responseText = await this.analyze(context, aiService, prompt, instruction);
             
-            await obsidian.appendAnalysisResult(fileInfo.relativePath, responseText, this.mode);
+            const header = `${TEXT.markdown.xPostHeader} (${this.mode})`;
+            await obsidian.appendAnalysisResult(fileInfo.relativePath, responseText, header);
 
             if (!this.ui.isInteractive()) {
                  console.warn(TEXT.errors.notTTY);

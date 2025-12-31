@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { TEXT } from '../config/text.ts';
 import { AppMode } from '../types/constants.ts';
+import { createNoteContent } from '../templates/obsidianNote.ts';
 
 export class ObsidianService {
     private vaultPath: string;
@@ -11,9 +12,27 @@ export class ObsidianService {
     }
 
     /**
-     * 新しいノートを作成する (Create)
-     * @param relativePath Vaultルートからの相対パス (例: "Inbox/2023-10-27/log.md")
-     * @param content 書き込む内容
+     * ログファイルの初期作成を行う高レベルAPI
+     */
+    async createInitialLog(
+        date: Date,
+        mode: AppMode,
+        inputData: string,
+        relativePath: string
+    ): Promise<string> {
+        const frontmatter = createNoteContent({
+            date: date,
+            mode: mode,
+            inputData: inputData
+        });
+
+        const fullPath = await this.createNote(relativePath, frontmatter);
+        console.log(`\n${TEXT.logs.obsidianSaved}: ${fullPath}`);
+        return fullPath;
+    }
+
+    /**
+     * 新しいノートを作成する (基本操作)
      */
     async createNote(relativePath: string, content: string): Promise<string> {
         const fullPath = path.join(this.vaultPath, relativePath);
@@ -26,8 +45,7 @@ export class ObsidianService {
     }
 
     /**
-     * ノートの内容を読み込む (Read)
-     * @param relativePath Vaultルートからの相対パス
+     * ノートの内容を読み込む (基本操作)
      */
     async readNote(relativePath: string): Promise<string> {
         const fullPath = path.join(this.vaultPath, relativePath);
@@ -36,7 +54,6 @@ export class ObsidianService {
 
     /**
      * コンテキストとしてノートを読み込む（ログ出力付き）
-     * @param relativePath Vaultルートからの相対パス
      */
     async readContextNote(relativePath: string): Promise<string> {
         console.log(`${TEXT.logs.readingFromObsidian}: ${relativePath}`);
@@ -44,9 +61,7 @@ export class ObsidianService {
     }
 
     /**
-     * ノートに追記する (Update/Append)
-     * @param relativePath Vaultルートからの相対パス
-     * @param content 追記する内容
+     * ノートに追記する (基本操作)
      */
     async appendNote(relativePath: string, content: string): Promise<void> {
         const fullPath = path.join(this.vaultPath, relativePath);
@@ -54,8 +69,7 @@ export class ObsidianService {
     }
 
     /**
-     * ノートを削除する (Delete)
-     * @param relativePath Vaultルートからの相対パス
+     * ノートを削除する (基本操作)
      */
     async deleteNote(relativePath: string): Promise<void> {
         const fullPath = path.join(this.vaultPath, relativePath);
@@ -64,16 +78,9 @@ export class ObsidianService {
 
     /**
      * AI解析結果をフォーマットして追記する
-     * @param relativePath Vaultルートからの相対パス
-     * @param responseText AIからの応答テキスト
-     * @param mode 実行モード
      */
-    async appendAnalysisResult(relativePath: string, responseText: string, mode: AppMode): Promise<void> {
-        const header = mode === AppMode.X_POST
-            ? TEXT.markdown.xPostHeader 
-            : TEXT.markdown.analysisHeader;
-
-        const analysisSection = `\n${header} (${mode})\n${responseText}\n`;
+    async appendAnalysisResult(relativePath: string, responseText: string, header: string): Promise<void> {
+        const analysisSection = `\n${header}\n${responseText}\n`;
         await this.appendNote(relativePath, analysisSection);
         
         console.log(`\n${TEXT.logs.fileRecorded}: ${relativePath}`);

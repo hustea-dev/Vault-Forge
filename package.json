@@ -11,7 +11,7 @@
     "zod": "^4.1.13"
   },
   "name": "vault-forge",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Forge new ideas from your Obsidian Vault with AI.",
   "main": "src/index.ts",
   "devDependencies": {

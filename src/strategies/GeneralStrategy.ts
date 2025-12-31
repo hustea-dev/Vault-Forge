@@ -3,4 +3,5 @@ import { BaseStrategy } from './BaseStrategy.ts';
 
 export class GeneralStrategy extends BaseStrategy {
     protected mode = AppMode.GENERAL;
+    protected saveInput = false;
 }
