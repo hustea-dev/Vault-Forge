@@ -2,9 +2,9 @@
 
 [🇯🇵 日本語のREADMEはこちら](./README_ja.md)
 
-**Forge new ideas from your Obsidian Vault with AI.**
+**Hone new ideas from your Obsidian Vault with AI.**
 
-Vault-Forge is a CLI tool that seamlessly integrates your terminal workflow with Obsidian and AI (Google Gemini). It captures fleeting notes, logs, and ideas, processes them with AI, and stores them in your vault, which you can then use as a space to forge and refine your creative ideas.
+Vault-Forge is a CLI tool that seamlessly integrates your terminal workflow with Obsidian and AI (Google Gemini). It captures fleeting notes, logs, and ideas, processes them with AI, and stores them in your vault, which you can then use as a space to hone and refine your creative ideas.
 
 ## Features
 

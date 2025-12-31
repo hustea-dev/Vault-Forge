@@ -1,6 +1,6 @@
 # Vault-Forge
 
-**AIと共に、Obsidian Vaultから新しい発想を鍛造（Forge）する。**
+**AIと共に、Obsidian Vaultから新しい発想を（Forge）鍛える。**
 
 Vault-Forgeは、ターミナルワークフローとObsidian、そしてAI (Google Gemini) をシームレスに統合するCLIツールです。
 ふとしたメモ、ログ、アイデアをキャプチャし、AIで処理してVaultに保存することで、クリエイティブな発想を鍛える場として活用できます。
