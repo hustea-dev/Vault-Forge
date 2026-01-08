@@ -1,4 +1,4 @@
-[🇺🇸 English](README.md)
+[🇺🇸 English](https://github.com/hustea-dev/Vault-Forge/blob/main/README.md)
 
 <a id="top"></a>
 # Vault-Forge v2.0

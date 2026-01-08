@@ -1,12 +1,16 @@
 {
   "name": "vault-forge",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "description": "Forge new ideas from your Obsidian Vault with AI.",
   "type": "module",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "bin": {
     "vf": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README_ja.md"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
@@ -39,6 +43,14 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
     "zenn-cli": "^0.2.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hustea-dev/Vault-Forge.git"
+  },
+  "homepage": "https://github.com/hustea-dev/Vault-Forge#readme",
+  "bugs": {
+    "url": "https://github.com/hustea-dev/Vault-Forge/issues"
   },
   "keywords": [
     "obsidian",

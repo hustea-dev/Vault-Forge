@@ -1,4 +1,4 @@
-[🇯🇵 日本語](README_ja.md)
+[🇯🇵 日本語](https://github.com/hustea-dev/Vault-Forge/blob/main/README_ja.md)
 
 <a id="top"></a>
 # Vault-Forge v2.0
