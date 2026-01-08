@@ -1,5 +1,5 @@
 import { TwitterApi } from 'twitter-api-v2';
-import { TEXT } from '../config/text.ts';
+import { TEXT } from '../config/text.js';
 
 export class XService {
     private client: TwitterApi;
@@ -23,8 +23,9 @@ export class XService {
 
     /**
      * ツイートを投稿する
-     * @param content 投稿内容
-     * @returns 投稿されたツイートの情報
+     * Posts a tweet.
+     * @param content 投稿内容 / Content to post
+     * @returns 投稿されたツイートの情報 / Posted tweet info
      */
     async postTweet(content: string): Promise<{ id: string; text: string }> {
         try {

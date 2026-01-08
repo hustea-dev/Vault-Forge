@@ -1,4 +1,4 @@
-import { TEXT } from '../config/text.ts';
+import { TEXT } from '../config/text.js';
 
 export const DEFAULT_PROMPTS: Record<string, string> = {
     general: `---

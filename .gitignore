@@ -1,9 +1,8 @@
 node_modules/
 .env
+.dist/
 .idea/
-ja.ts.bak
-PLAN/
-src/PLAN/
+.DS_Store
 demo/
 *.gif
 *.tape

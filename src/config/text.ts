@@ -1,7 +1,7 @@
-import { MESSAGES as JA_MESSAGES } from './locales/ja.ts';
-import { MESSAGES as EN_MESSAGES } from './locales/en.ts';
-import { PROMPTS as JA_PROMPTS } from './prompts/ja.ts';
-import { PROMPTS as EN_PROMPTS } from './prompts/en.ts';
+import { MESSAGES as JA_MESSAGES } from './locales/ja.js';
+import { MESSAGES as EN_MESSAGES } from './locales/en.js';
+import { PROMPTS as JA_PROMPTS } from './prompts/ja.js';
+import { PROMPTS as EN_PROMPTS } from './prompts/en.js';
 
 const lang = process.env.APP_LANG || 'ja';
 

@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist_tests",
+    "noEmit": false
+  },
+  "include": [
+    "src/**/*",
+    "tests/e2e/runner.ts"
+  ]
+}
