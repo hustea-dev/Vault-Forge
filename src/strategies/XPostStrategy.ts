@@ -41,7 +41,10 @@ export class XPostStrategy extends BaseStrategy {
         await obsidian.appendAnalysisResult(fileInfo.relativePath, responseText, header);
 
         const promptData = await this.getPromptData(promptSmith);
-        if (configService.isDetachedMode || promptData.outputMode === 'background') {
+        
+        const isPiped = !process.stdin.isTTY;
+
+        if (configService.isDetachedMode || promptData.outputMode === 'background' || isPiped) {
             return;
         }
 
