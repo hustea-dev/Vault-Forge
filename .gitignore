@@ -1,10 +1,20 @@
 node_modules/
 .env
+dist/
+dist_tests/
+.obsidian/
+vault/
+vault
+PLAN
 .idea/
-ja.ts.bak
-PLAN/
-src/PLAN/
+.DS_Store
 demo/
 *.gif
 *.tape
 *.bak
+
+# TypeScript compiled files in tests
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map

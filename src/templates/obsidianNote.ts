@@ -1,5 +1,5 @@
-import { TEXT } from '../config/text.ts';
-import type {NoteData} from '../types/interfaces.ts';
+import { TEXT } from '../config/text.js';
+import type {NoteData} from '../types/interfaces.js';
 
 export const createNoteContent = (data: NoteData): string => {
     return `---

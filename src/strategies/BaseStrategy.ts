@@ -1,13 +1,19 @@
-import { ObsidianService } from '../services/ObsidianService.ts';
-import { UserInteraction } from '../services/UserInteraction.ts';
-import { PromptLoader } from '../core/PromptLoader.ts';
-import type { ModeStrategy, AIService } from '../types/interfaces.ts';
-import { AppMode } from '../types/constants.ts';
-import { TEXT } from '../config/text.ts';
+import { ObsidianService } from '../services/ObsidianService.js';
+import { UserInteraction } from '../services/UserInteraction.js';
+import { PromptSmith } from '../core/PromptSmith.js';
+import type { ModeStrategy, AIService, PromptData } from '../types/interfaces.js';
+import { AppMode } from '../types/constants.js';
+import { TEXT } from '../config/text.js';
+import { AIOrchestratorService } from '../services/AIOrchestratorService.js';
+import { ConfigService } from '../services/ConfigService.js';
 
 export abstract class BaseStrategy implements ModeStrategy {
     protected abstract mode: AppMode;
     protected abstract saveInput: boolean;
+    protected abstract shouldProcessResult: boolean;
+    
+    static readonly supportsDetach: boolean;
+
     protected ui: UserInteraction;
 
     constructor() {
@@ -17,11 +23,14 @@ export abstract class BaseStrategy implements ModeStrategy {
     async execute(
         inputData: string,
         obsidian: ObsidianService,
-        aiService: AIService,
-        promptLoader: PromptLoader,
+        promptSmith: PromptSmith,
+        aiOrchestrator: AIOrchestratorService,
+        configService: ConfigService, 
         fileInfo: { relativePath: string; fullPath: string },
         date: Date,
-        instruction?: string
+        instruction?: string,
+        overrideModel?: { provider: string; model: string },
+        cliOptions?: Record<string, any>
     ): Promise<any> {
         
         if (this.saveInput) {
@@ -34,10 +43,38 @@ export abstract class BaseStrategy implements ModeStrategy {
         }
 
         const context = await this.prepareContext(inputData, obsidian, fileInfo);
-        const prompt = await this.getPrompt(promptLoader);
-        const responseText = await this.analyze(context, aiService, prompt, instruction);
+        const promptData = await this.getPromptData(promptSmith);
+        
+        if (cliOptions?.stream) {
+            promptData.outputMode = 'stream';
+        } else if (cliOptions?.normal) {
+            promptData.outputMode = 'normal';
+        }
 
-        await this.processResult(responseText, obsidian, fileInfo);
+        if (configService.isDetachedMode) {
+            promptData.outputMode = 'normal';
+        }
+
+        const aiProvider = overrideModel?.provider || promptData.aiProvider || 'gemini';
+        const model = overrideModel?.model || promptData.model;
+        const aiService = aiOrchestrator.createAIService(aiProvider, model);
+        const effectivePromptData = { ...promptData, aiProvider, model };
+
+        const responseText = await this.analyze(context, aiService, effectivePromptData, aiProvider, obsidian, instruction);
+
+        if (this.shouldProcessResult) {
+            await this.handleResult(
+                responseText, 
+                obsidian, 
+                fileInfo,
+                promptSmith,
+                aiOrchestrator,
+                configService,
+                instruction,
+                overrideModel
+            );
+        }
+        
         return { responseText };
     }
 
@@ -49,22 +86,34 @@ export abstract class BaseStrategy implements ModeStrategy {
         return inputData;
     }
 
-    protected async getPrompt(loader: PromptLoader): Promise<string> {
+    protected async getPromptData(promptSmith: PromptSmith): Promise<PromptData> {
         try {
-            return await loader.load(this.mode);
+            return await promptSmith.load(this.mode);
         } catch (e: any) {
-            this.ui.warn(TEXT.loader.loadError);
-            this.ui.warn(`${TEXT.loader.reason}: ${e.message}`);
+            await this.ui.warn(TEXT.loader.loadError);
+            await this.ui.warn(`${TEXT.loader.reason}: ${e.message}`);
 
-            this.ui.error(TEXT.loader.aborting);
+            await this.ui.error(TEXT.loader.aborting);
             process.exit(1);
         }
     }
 
-    protected async analyze(context: string, aiService: AIService, prompt: string, instruction?: string): Promise<string> {
-        console.log(`${TEXT.logs.geminiAnalyzing} (${this.mode} ${TEXT.logs.modeSuffix})...`);
+    protected async analyze(
+        context: string, 
+        aiService: AIService, 
+        promptData: PromptData, 
+        aiProvider: string, 
+        obsidian: ObsidianService, 
+        instruction?: string
+    ): Promise<string> {
+        if (this.mode === AppMode.GENERAL && promptData.outputMode === 'background') {
+            throw new Error(TEXT.errors.generalBackgroundNotSupported);
+        }
 
-        let promptText = `${prompt}\n\n`;
+        const analyzingMsg = TEXT.logs.aiAnalyzing.replace('{provider}', aiProvider);
+        await this.ui.info(`${analyzingMsg} (${this.mode} ${TEXT.logs.modeSuffix})...`);
+
+        let promptText = `${promptData.content}\n\n`;
         
         if (instruction) {
             promptText += `${TEXT.labels.additionalInstruction}:\n${instruction}\n\n`;
@@ -73,31 +122,78 @@ export abstract class BaseStrategy implements ModeStrategy {
         promptText += `${TEXT.labels.targetData}:\n${context}`;
 
         try {
-            const result = await aiService.generateContent(promptText);
-            const responseText = result.text || TEXT.errors.analysisFailed;
-
-            console.log(`\n${TEXT.logs.analysisResult}:\n${responseText}`);
-            
-            if (result.usage) {
-                const logMessage = TEXT.logs.tokenUsage
-                    .replace('{input}', result.usage.promptTokens.toString())
-                    .replace('{output}', result.usage.completionTokens.toString())
-                    .replace('{total}', result.usage.totalTokens.toString());
-                console.log(`\n${logMessage}`);
+            if (process.env.NODE_ENV !== 'test') {
+                console.log(`\n${TEXT.logs.analysisResult}:`);
             }
 
-            return responseText;
+            if (promptData.outputMode === 'stream') {
+                const stream = aiService.generateContentStream(promptText);
+                let fullText = "";
 
-        } catch (error) {
-            console.error(TEXT.errors.geminiApi, error);
+                for await (const chunk of stream) {
+                    process.stdout.write(chunk);
+                    fullText += chunk;
+                }
+                
+                if (process.env.NODE_ENV !== 'test') {
+                    console.log('\n');
+                }
+
+                const usage = {
+                    promptTokens: 0,
+                    completionTokens: fullText.length,
+                    totalTokens: fullText.length
+                };
+
+                await obsidian.recordTokenUsage(
+                    this.mode,
+                    aiProvider,
+                    promptData.model || 'unknown',
+                    usage
+                );
+                
+                return fullText;
+
+            } else {
+                const result = await aiService.generateContent(promptText);
+                const responseText = result.text || TEXT.errors.analysisFailed;
+
+                console.log(responseText);
+                
+                if (result.usage) {
+                    const logMessage = TEXT.logs.tokenUsage
+                        .replace('{input}', result.usage.promptTokens.toString())
+                        .replace('{output}', result.usage.completionTokens.toString())
+                        .replace('{total}', result.usage.totalTokens.toString());
+                    await this.ui.info(`\n${logMessage}`);
+
+                    await obsidian.recordTokenUsage(
+                        this.mode,
+                        aiProvider,
+                        promptData.model || 'unknown',
+                        result.usage
+                    );
+                }
+
+                return responseText;
+            }
+
+        } catch (error: any) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            await this.ui.error(`${TEXT.errors.aiApi} ${errorMessage}`);
             throw error;
         }
     }
 
-    protected async processResult(
+    protected async handleResult(
         responseText: string, 
         obsidian: ObsidianService, 
-        fileInfo: { relativePath: string; fullPath: string }
+        fileInfo: { relativePath: string; fullPath: string },
+        promptSmith?: PromptSmith,
+        aiOrchestrator?: AIOrchestratorService,
+        configService?: ConfigService,
+        instruction?: string,
+        overrideModel?: { provider: string; model: string }
     ): Promise<void> {
     }
 }

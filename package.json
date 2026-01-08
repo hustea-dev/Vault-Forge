@@ -1,28 +1,44 @@
 {
+  "name": "vault-forge",
+  "version": "2.0.0",
+  "description": "Forge new ideas from your Obsidian Vault with AI.",
   "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "vf": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "ts-node src/index.ts",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:e2e": "rm -rf dist_tests && tsc -p tsconfig.e2e.json && cross-env NODE_OPTIONS=--experimental-vm-modules jest --detectOpenHandles --testMatch '**/tests/e2e/**/*.e2e.test.ts'"
+  },
   "dependencies": {
-    "@google/genai": "^1.4.0",
-    "@inquirer/prompts": "^5.0.0",
+    "@anthropic-ai/sdk": "^0.71.2",
+    "@clack/prompts": "^0.11.0",
+    "@google/generative-ai": "^0.24.1",
+    "commander": "^14.0.2",
     "dotenv": "^16.5.0",
     "gray-matter": "^4.0.3",
     "marked": "^15.0.12",
     "marked-terminal": "^7.3.0",
+    "openai": "^6.15.0",
+    "tabtab": "^3.0.2",
     "twitter-api-v2": "^1.15.0",
     "zod": "^4.1.13"
   },
-  "name": "vault-forge",
-  "version": "1.2.1",
-  "description": "Forge new ideas from your Obsidian Vault with AI.",
-  "main": "src/index.ts",
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@types/tabtab": "^3.0.5",
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
     "zenn-cli": "^0.2.11"
-  },
-  "scripts": {
-    "test": "node --test src/strategies/*.test.ts"
   },
   "keywords": [
     "obsidian",
