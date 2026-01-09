@@ -120,7 +120,9 @@ export const MESSAGES = {
         setupCompletionManual: "You can try manually by running: vf completion",
         confirmLargeInput: "⚠️ Input data is large ({length} chars). Do you really want to append this to your daily note?",
         completionAlreadySetUp: "ℹ️ Tab completion is already set up in your shell config file.",
-        initCompleted: "Init completed"
+        initCompleted: "Init completed",
+        completionInstallStart: "🚀 Starting shell completion setup...",
+        completionInstallInfo: "ℹ️  The following settings will be appended to your shell config file (.zshrc, .bashrc, etc.):\n(Press Ctrl+C to cancel)\n\n# tabtab source for packages\n[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true"
     },
     loader: {
         loadError: "Failed to load custom prompt.",

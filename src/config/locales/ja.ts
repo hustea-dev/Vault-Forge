@@ -120,7 +120,9 @@ export const MESSAGES = {
         setupCompletionManual: "手動でセットアップするには `vf completion` を実行してください。",
         confirmLargeInput: "⚠️ 入力データが大きすぎます ({length} 文字)。本当に日記に追記しますか？",
         completionAlreadySetUp: "ℹ️ タブ補完は既にシェル設定ファイルに設定されています。",
-        initCompleted: "初期化が完了しました"
+        initCompleted: "初期化が完了しました",
+        completionInstallStart: "🚀 シェル補完のセットアップを開始します...",
+        completionInstallInfo: "ℹ️  以下の設定がシェル設定ファイル (.zshrc, .bashrc 等) に追記されます:\n\n# tabtab source for packages\n[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true\n\n(キャンセルするには Ctrl+C を押してください)"
     },
     loader: {
         loadError: "カスタムプロンプトの読み込みに失敗しました。",

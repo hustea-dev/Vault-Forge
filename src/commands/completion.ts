@@ -131,6 +131,9 @@ export function registerCompletionCommand(program: Command) {
     program.command('completion')
         .description(TEXT.commands.completion.description)
         .action(async () => {
+            console.log(TEXT.ui.completionInstallStart);
+            console.log(TEXT.ui.completionInstallInfo);
+
             await tabtab.install({
                 name: 'vf',
                 completer: 'vf'

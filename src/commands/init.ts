@@ -36,6 +36,9 @@ export function registerInitCommand(program: Command) {
             });
 
             if (shouldSetupCompletion) {
+                console.log('\n' + TEXT.ui.completionInstallStart);
+                console.log(TEXT.ui.completionInstallInfo + '\n');
+                
                 try {
                     await tabtab.install({
                         name: 'vf',
@@ -45,6 +48,8 @@ export function registerInitCommand(program: Command) {
                     console.error(TEXT.ui.setupCompletionFailed);
                     console.log(TEXT.ui.setupCompletionManual);
                 }
+            } else {
+                console.log(TEXT.ui.setupCompletionManual);
             }
         });
 }
