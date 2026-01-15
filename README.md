@@ -50,7 +50,7 @@ npm install -g vault-forge
 ### Setup for Development Environment
 If you are cloning the repository:
 ```bash
-git clone https://github.com/your-repo/vault-forge.git
+git clone https://github.com/hustea-dev/Vault-Forge
 cd vault-forge
 npm install
 npm run build

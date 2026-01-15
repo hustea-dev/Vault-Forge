@@ -13,7 +13,7 @@ export function registerInitCommand(program: Command) {
         .action(async () => {
 
             const configService = new ConfigService();
-            if (!configService.hasEnvFile()) {
+            if (!configService.isConfigured()) {
                 console.error(TEXT.errors.envMissing);
                 process.exit(1);
             } else if (!configService.hasVaultPath()) {

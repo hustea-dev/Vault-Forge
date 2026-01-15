@@ -50,7 +50,7 @@ npm install -g vault-forge
 ### 開発環境でのセットアップ
 リポジトリをクローンして使用する場合：
 ```bash
-git clone https://github.com/your-repo/vault-forge.git
+git clone https://github.com/hustea-dev/Vault-Forge
 cd vault-forge
 npm install
 npm run build
