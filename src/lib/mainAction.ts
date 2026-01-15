@@ -33,7 +33,7 @@ export async function mainAction(inputArg: string | undefined, options: any) {
 
         const configService = new ConfigService();
 
-        if (!configService.hasEnvFile()) {
+        if (!configService.isConfigured()) {
             console.error(TEXT.errors.envMissing);
             console.error(TEXT.ui.runInit);
             process.exit(1);

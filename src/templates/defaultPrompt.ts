@@ -5,6 +5,8 @@ export const DEFAULT_PROMPTS: Record<string, string> = {
 description: "${TEXT.loader.defaultPromptDescription.replace('{promptName}', 'general')}"
 version: 1.0
 tags: ["system-prompt"]
+aiProvider: ""
+model: ""
 ---
 
 ${TEXT.prompts.general}
@@ -14,6 +16,8 @@ ${TEXT.prompts.general}
 description: "${TEXT.loader.defaultPromptDescription.replace('{promptName}', 'xpost')}"
 version: 1.0
 tags: ["system-prompt"]
+aiProvider: ""
+model: ""
 ---
 
 ${TEXT.prompts.xpost}
@@ -23,6 +27,8 @@ ${TEXT.prompts.xpost}
 description: "${TEXT.loader.defaultPromptDescription.replace('{promptName}', 'debug')}"
 version: 1.0
 tags: ["system-prompt"]
+aiProvider: ""
+model: ""
 ---
 
 ${TEXT.prompts.debug}

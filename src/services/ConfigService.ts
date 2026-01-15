@@ -3,6 +3,7 @@ import { TEXT } from '../config/text.js';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 /**
  * 環境変数や設定値を一元管理するサービスクラス。
@@ -41,6 +42,16 @@ export class ConfigService {
     }
 
     /**
+     * アプリケーションが設定済みかどうかを確認する。
+     * .env ファイルが存在するか、または必須の環境変数 (OBSIDIAN_VAULT_PATH) が設定されていれば true を返す。
+     * Checks if the application is configured.
+     * Returns true if the .env file exists OR if the required environment variable (OBSIDIAN_VAULT_PATH) is set.
+     */
+    isConfigured(): boolean {
+        return this.hasEnvFile() || this.hasVaultPath();
+    }
+
+    /**
      * Vault Path が設定されているかどうかを確認する。
      * Checks if the Vault Path is set.
      */
@@ -54,11 +65,16 @@ export class ConfigService {
      * @throws {Error} 環境変数が設定されていない場合 / If the environment variable is not set.
      */
     get vaultPath(): string {
-        const path = process.env.OBSIDIAN_VAULT_PATH;
-        if (!path) {
+        let vaultPath = process.env.OBSIDIAN_VAULT_PATH;
+        if (!vaultPath) {
             throw new Error(TEXT.errors.vaultPathNotSet);
         }
-        return path;
+
+        if (vaultPath.startsWith('~')) {
+            vaultPath = path.join(os.homedir(), vaultPath.slice(1));
+        }
+
+        return vaultPath;
     }
 
     /**
@@ -76,7 +92,7 @@ export class ConfigService {
      * @returns {string} 言語コード (デフォルトは 'en') / Language code (defaults to 'en').
      */
     get language(): string {
-        return process.env.APP_LANG || 'en';
+        return process.env.VF_LANG || process.env.APP_LANG || 'en';
     }
 
     /**
