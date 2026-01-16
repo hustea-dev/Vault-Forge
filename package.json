@@ -1,6 +1,6 @@
 {
   "name": "vault-forge",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Forge new ideas from your Obsidian Vault with AI.",
   "type": "module",
   "main": "dist/index.js",
@@ -12,7 +12,7 @@
     "README_ja.md"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc && chmod +x dist/index.js",
     "watch": "tsc --watch",
     "start": "ts-node src/index.ts",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
